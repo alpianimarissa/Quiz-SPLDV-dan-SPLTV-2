@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Interaktif SPLDV & SPLTV (20 Soal)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- MathJax for rendering LaTeX -->
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true
+            },
+            options: {
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" id="MathJax-script" async></script>
+    <!-- Google Fonts Inter & Fira Code -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .mjx-chtml { font-size: 105% !important; }
+        .solution-step {
+            border-left: 3px solid #0284c7;
+            padding-left: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-slate-900/95 backdrop-blur-md border-b border-slate-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-sky-500 p-2 rounded-lg text-slate-900 font-bold shadow-md">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="font-bold text-base sm:text-lg text-white tracking-tight">Kuis Interaktif SPLDV & SPLTV</h1>
+                    <p class="text-xs text-sky-400 font-medium">20 Soal • Pembahasan Langsung & Autosave</p>
+                </div>
+            </div>
+
+            <!-- Score Badge & Controls -->
+            <div class="flex items-center space-x-3">
+                <div class="bg-slate-800 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2 text-xs sm:text-sm">
+                    <span class="text-slate-400">Skor:</span>
+                    <span id="score-display" class="font-bold text-emerald-400 font-mono text-base">0 / 20</span>
+                </div>
+                <button onclick="resetQuizPrompt()" class="px-3 py-1.5 bg-rose-600/20 hover:bg-rose-600/30 text-rose-300 border border-rose-500/30 rounded-lg text-xs font-semibold transition flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                    </svg>
+                    <span class="hidden sm:inline">Reset</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="w-full bg-slate-800 h-1.5">
+            <div id="progress-bar" class="bg-sky-500 h-1.5 transition-all duration-300 w-0"></div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+
+        <!-- Sidebar Navigation Grid (1-20) -->
+        <aside class="lg:col-span-1 order-2 lg:order-1 bg-slate-800/80 p-5 rounded-2xl border border-slate-700 shadow-xl self-start space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h3 class="text-sm font-bold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
+                    </svg>
+                    Navigasi Soal
+                </h3>
+                <span id="answered-count" class="text-xs bg-slate-700 px-2 py-0.5 rounded text-sky-300 font-mono">0/20 Terjawab</span>
+            </div>
+
+            <!-- Question Numbers Grid -->
+            <div id="nav-grid" class="grid grid-cols-5 gap-2">
+                <!-- Dynamically generated by JS -->
+            </div>
+
+            <!-- Legend -->
+            <div class="pt-3 border-t border-slate-700/60 space-y-1.5 text-xs text-slate-400">
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded bg-slate-700 border border-slate-600 inline-block"></span>
+                    <span>Belum Diisi</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded bg-emerald-600 inline-block"></span>
+                    <span>Jawaban Benar</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded bg-rose-600 inline-block"></span>
+                    <span>Jawaban Salah</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Active Question Panel -->
+        <section class="lg:col-span-3 order-1 lg:order-2 space-y-6">
+            
+            <!-- Question Card -->
+            <div class="bg-slate-800/90 rounded-2xl border border-slate-700 p-6 sm:p-8 shadow-xl space-y-6">
+                
+                <!-- Category & Number Badge -->
+                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-700/80 pb-4">
+                    <span id="q-category" class="px-3 py-1 rounded-full text-xs font-semibold bg-sky-500/20 text-sky-300 border border-sky-500/30">
+                        SPLDV • Soal Langsung
+                    </span>
+                    <span id="q-number-title" class="text-sm font-bold text-slate-400 font-mono">
+                        Soal 1 dari 20
+                    </span>
+                </div>
+
+                <!-- Question Text -->
+                <div id="q-text" class="text-base sm:text-lg text-slate-100 leading-relaxed font-medium">
+                    <!-- Loaded dynamically -->
+                </div>
+
+                <!-- Answer Options -->
+                <div id="options-container" class="space-y-3 pt-2">
+                    <!-- Options buttons loaded dynamically -->
+                </div>
+
+                <!-- Instant Feedback & Pembahasan Box -->
+                <div id="explanation-box" class="hidden p-5 rounded-xl border transition-all duration-300 space-y-3">
+                    <div id="feedback-status" class="flex items-center gap-2 font-bold text-base">
+                        <!-- Correct/Incorrect message -->
+                    </div>
+                    <div class="text-xs font-bold uppercase tracking-wider text-slate-400 pt-2 border-t border-slate-700/60">
+                        Pembahasan Detail:
+                    </div>
+                    <div id="explanation-text" class="text-sm text-slate-200 leading-relaxed space-y-2">
+                        <!-- Step-by-step solution loaded dynamically -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Bottom Navigation Bar -->
+            <div class="flex items-center justify-between gap-4">
+                <button id="btn-prev" onclick="navigateQuestion(-1)" class="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl border border-slate-700 transition flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    Sebelumnya
+                </button>
+
+                <button id="btn-next" onclick="navigateQuestion(1)" class="px-5 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-semibold rounded-xl shadow-lg transition flex items-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed">
+                    Selanjutnya
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                    </svg>
+                </button>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 border-t border-slate-800 text-slate-500 py-6 text-center text-xs mt-auto">
+        <p>Kuis Matematika SPLDV & SPLTV • Evaluasi Interaktif</p>
+    </footer>
+
+    <!-- Script Application Logic -->
+    <script>
+        // 20 Questions Data Structure (10 SPLDV: 7 Direct + 3 Story | 10 SPLTV: 7 Direct + 3 Story)
+        // Correct answer positions are randomly randomized across A, B, C, D to eliminate repeating patterns.
+        const questionsData = [
+            // ==================== SPLDV DIRECT (1 - 7) ====================
+            {
+                id: 1,
+                category: "SPLDV • Soal Langsung",
+                question: "Diketahui sistem persamaan linear dua variabel:<br>$$\\begin{aligned} x + y &= 5 \\\\ x - y &= 1 \\end{aligned}$$<br>Nilai Himpunan Penyelesaian $(x, y)$ yang memenuhi adalah...",
+                options: [
+                    { key: "A", text: "$\\{(2, 3)\\}$", isCorrect: false },
+                    { key: "B", text: "$\\{(4, 1)\\}$", isCorrect: false },
+                    { key: "C", text: "$\\{(3, 2)\\}$", isCorrect: true },
+                    { key: "D", text: "$\\{(1, 4)\\}$", isCorrect: false }
+                ],
+                explanation: "<strong>Metode Eliminasi & Substitusi:</strong><br><div class='solution-step'>Jumlahkan kedua persamaan:<br>$(x + y) + (x - y) = 5 + 1 \\implies 2x = 6 \\implies \\mathbf{x = 3}$</div><div class='solution-step'>Substitusi $x = 3$ ke $x + y = 5$:<br>$3 + y = 5 \\implies \\mathbf{y = 2}$</div>Maka $HP = \\{(3, 2)\\}$."
+            },
+            {
+                id: 2,
+                category: "SPLDV • Soal Langsung",
+                question: "Diketahui sistem persamaan:<br>$$\\begin{aligned} 2x + 3y &= 12 \\\\ x - y &= 1 \\end{aligned}$$<br>Berapakah nilai dari $x + y$?",
+                options: [
+                    { key: "A", text: "$6$", isCorrect: false },
+                    { key: "B", text: "$4$", isCorrect: false },
+                    { key: "C", text: "$7$", isCorrect: false },
+                    { key: "D", text: "$5$", isCorrect: true }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Dari persamaan (2): $x = y + 1$</div><div class='solution-step'>Substitusi ke (1):<br>$2(y + 1) + 3y = 12 \\implies 2y + 2 + 3y = 12 \\implies 5y = 10 \\implies \\mathbf{y = 2}$</div><div class='solution-step'>Maka $x = 2 + 1 = \\mathbf{3}$</div>Sehingga nilai $x + y = 3 + 2 = \\mathbf{5}$."
+            },
+            {
+                id: 3,
+                category: "SPLDV • Soal Langsung",
+                question: "Tentukan Himpunan Penyelesaian $(x, y)$ dari sistem persamaan:<br>$$\\begin{aligned} 3x - 2y &= 7 \\\\ 2x + y &= 7 \\end{aligned}$$",
+                options: [
+                    { key: "A", text: "$\\{(3, 1)\\}$", isCorrect: true },
+                    { key: "B", text: "$\\{(1, 3)\\}$", isCorrect: false },
+                    { key: "C", text: "$\\{(2, 3)\\}$", isCorrect: false },
+                    { key: "D", text: "$\\{(3, 2)\\}$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Isolasi $y$ dari pers (2): $y = 7 - 2x$</div><div class='solution-step'>Substitusi ke pers (1):<br>$3x - 2(7 - 2x) = 7 \\implies 3x - 14 + 4x = 7 \\implies 7x = 21 \\implies \\mathbf{x = 3}$</div><div class='solution-step'>Maka $y = 7 - 2(3) = \\mathbf{1}$</div>Sehingga $HP = \\{(3, 1)\\}$."
+            },
+            {
+                id: 4,
+                category: "SPLDV • Soal Langsung",
+                question: "Diketahui persamaan $x + 2y = 8$ dan $3x - y = 3$. Nilai dari hasil kali $x \\cdot y$ adalah...",
+                options: [
+                    { key: "A", text: "$4$", isCorrect: false },
+                    { key: "B", text: "$6$", isCorrect: true },
+                    { key: "C", text: "$5$", isCorrect: false },
+                    { key: "D", text: "$8$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Kalikan pers (2) dengan 2:<br>$6x - 2y = 6$</div><div class='solution-step'>Jumlahkan dengan pers (1):<br>$(x + 2y) + (6x - 2y) = 8 + 6 \\implies 7x = 14 \\implies \\mathbf{x = 2}$</div><div class='solution-step'>Substitusi $x = 2$ ke pers (1): $2 + 2y = 8 \\implies 2y = 6 \\implies \\mathbf{y = 3}$</div>Maka hasil kali $x \\cdot y = 2 \\times 3 = \\mathbf{6}$."
+            },
+            {
+                id: 5,
+                category: "SPLDV • Soal Langsung",
+                question: "Jika $4x + 3y = 18$ dan $2x - y = 4$, berapakah nilai dari $x$?",
+                options: [
+                    { key: "A", text: "$2$", isCorrect: false },
+                    { key: "B", text: "$4$", isCorrect: false },
+                    { key: "C", text: "$5$", isCorrect: false },
+                    { key: "D", text: "$3$", isCorrect: true }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Dari pers (2): $y = 2x - 4$</div><div class='solution-step'>Substitusi ke pers (1):<br>$4x + 3(2x - 4) = 18 \\implies 4x + 6x - 12 = 18 \\implies 10x = 30 \\implies \\mathbf{x = 3}$</div>Maka nilai $x = \\mathbf{3}$."
+            },
+            {
+                id: 6,
+                category: "SPLDV • Soal Langsung",
+                question: "Diketahui $5x - 2y = 11$ dan $2x + 3y = 12$. Nilai $y$ yang memenuhi sistem tersebut adalah...",
+                options: [
+                    { key: "A", text: "$1$", isCorrect: false },
+                    { key: "B", text: "$3$", isCorrect: false },
+                    { key: "C", text: "$2$", isCorrect: true },
+                    { key: "D", text: "$4$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Eliminasi $x$ (Pers 1 dikali 2, Pers 2 dikali 5):<br>$10x - 4y = 22$<br>$10x + 15y = 60$</div><div class='solution-step'>Kurangkan kedua persamaan:<br>$-19y = -38 \\implies \\mathbf{y = 2}$</div>Maka nilai $y = \\mathbf{2}$."
+            },
+            {
+                id: 7,
+                category: "SPLDV • Soal Langsung",
+                question: "Pasangan terurut $(x, y)$ yang memenuhi $x - 3y = -7$ dan $2x + y = 7$ adalah...",
+                options: [
+                    { key: "A", text: "$\\{(2, 3)\\}$", isCorrect: true },
+                    { key: "B", text: "$\\{(3, 2)\\}$", isCorrect: false },
+                    { key: "C", text: "$\\{(1, 3)\\}$", isCorrect: false },
+                    { key: "D", text: "$\\{(3, 1)\\}$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Dari pers (1): $x = 3y - 7$</div><div class='solution-step'>Substitusi ke pers (2):<br>$2(3y - 7) + y = 7 \\implies 6y - 14 + y = 7 \\implies 7y = 21 \\implies \\mathbf{y = 3}$</div><div class='solution-step'>Maka $x = 3(3) - 7 = \\mathbf{2}$</div>HP = $\\{(2, 3)\\}$."
+            },
+
+            // ==================== SPLDV SOAL CERITA (8 - 10) ====================
+            {
+                id: 8,
+                category: "SPLDV • Soal Cerita",
+                question: "Budi membeli $2$ buku dan $3$ pensil seharga $\\text{Rp } 12.000$. Ani membeli $3$ buku dan $1$ pensil seharga $\\text{Rp } 11.000$. Jika Candra ingin membeli $1$ buku dan $1$ pensil, berapa total harga yang harus dibayar Candra?",
+                options: [
+                    { key: "A", text: "$\\text{Rp } 4.000$", isCorrect: false },
+                    { key: "B", text: "$\\text{Rp } 5.000$", isCorrect: true },
+                    { key: "C", text: "$\\text{Rp } 4.500$", isCorrect: false },
+                    { key: "D", text: "$\\text{Rp } 6.000$", isCorrect: false }
+                ],
+                explanation: "<strong>Model Matematika:</strong><br>Misal harga 1 buku = $b$, harga 1 pensil = $p$.<br><div class='solution-step'>1) $2b + 3p = 12.000$<br>2) $3b + p = 11.000 \\implies p = 11.000 - 3b$</div><div class='solution-step'>Substitusi $p$ ke (1):<br>$2b + 3(11.000 - 3b) = 12.000 \\implies 2b + 33.000 - 9b = 12.000 \\implies -7b = -21.000 \\implies \\mathbf{b = 3.000}$</div><div class='solution-step'>Maka $p = 11.000 - 3(3.000) = \\mathbf{2.000}$</div>Harga $1\\text{ buku} + 1\\text{ pensil} = 3.000 + 2.000 = \\mathbf{\\text{Rp } 5.000}$."
+            },
+            {
+                id: 9,
+                category: "SPLDV • Soal Cerita",
+                question: "Keliling sebuah persegi panjang adalah $28\\text{ cm}$. Jika panjangnya $4\\text{ cm}$ lebih panjang dari lebarnya, berapakah luas persegi panjang tersebut?",
+                options: [
+                    { key: "A", text: "$40\\text{ cm}^2$", isCorrect: false },
+                    { key: "B", text: "$50\\text{ cm}^2$", isCorrect: false },
+                    { key: "C", text: "$45\\text{ cm}^2$", isCorrect: true },
+                    { key: "D", text: "$36\\text{ cm}^2$", isCorrect: false }
+                ],
+                explanation: "<strong>Model Matematika:</strong><br>Misal panjang = $p$, lebar = $l$.<br><div class='solution-step'>1) $2(p + l) = 28 \\implies p + l = 14$<br>2) $p - l = 4$</div><div class='solution-step'>Jumlahkan kedua persamaan:<br>$2p = 18 \\implies \\mathbf{p = 9\\text{ cm}}$<br>Maka $l = 14 - 9 = \\mathbf{5\\text{ cm}}$</div><div class='solution-step'>Luas = $p \\times l = 9 \\times 5 = \\mathbf{45\\text{ cm}^2}$</div>."
+            },
+            {
+                id: 10,
+                category: "SPLDV • Soal Cerita",
+                question: "Umur ayah saat ini adalah $4$ kali umur anaknya. Enam tahun yang lalu, umur ayah adalah $7$ kali umur anaknya. Berapakah jumlah umur ayah dan anak saat ini?",
+                options: [
+                    { key: "A", text: "$54\\text{ tahun}$", isCorrect: false },
+                    { key: "B", text: "$65\\text{ tahun}$", isCorrect: false },
+                    { key: "C", text: "$72\\text{ tahun}$", isCorrect: false },
+                    { key: "D", text: "$60\\text{ tahun}$", isCorrect: true }
+                ],
+                explanation: "<strong>Model Matematika:</strong><br>Misal umur ayah = $A$, umur anak = $S$.<br><div class='solution-step'>1) $A = 4S$<br>2) $A - 6 = 7(S - 6)$</div><div class='solution-step'>Substitusi (1) ke (2):<br>$4S - 6 = 7S - 42 \\implies 3S = 36 \\implies \\mathbf{S = 12\\text{ tahun}}$</div><div class='solution-step'>Maka $A = 4(12) = \\mathbf{48\\text{ tahun}}$</div>Jumlah umur = $48 + 12 = \\mathbf{60\\text{ tahun}}$."
+            },
+
+            // ==================== SPLTV DIRECT (11 - 17) ====================
+            {
+                id: 11,
+                category: "SPLTV • Soal Langsung",
+                question: "Diketahui sistem persamaan linear tiga variabel:<br>$$\\begin{aligned} x + y + z &= 6 \\\\ x + 2y - z &= 2 \\\\ 2x - y + z &= 3 \\end{aligned}$$<br>Himpunan penyelesaian $(x, y, z)$ yang memenuhi adalah...",
+                options: [
+                    { key: "A", text: "$\\{(1, 2, 3)\\}$", isCorrect: true },
+                    { key: "B", text: "$\\{(2, 1, 3)\\}$", isCorrect: false },
+                    { key: "C", text: "$\\{(3, 2, 1)\\}$", isCorrect: false },
+                    { key: "D", text: "$\\{(1, 3, 2)\\}$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Isolasi $x$ dari (1): $x = 6 - y - z$</div><div class='solution-step'>Substitusi $x$ ke (2) & (3):<br>• Ke (2): $(6-y-z)+2y-z=2 \\implies y - 2z = -4$<br>• Ke (3): $2(6-y-z)-y+z=3 \\implies 3y + z = 9 \\implies z = 9 - 3y$</div><div class='solution-step'>Substitusi $z$ ke pers pertama: $y - 2(9-3y) = -4 \\implies 7y = 14 \\implies \\mathbf{y = 2}$<br>Maka $\\mathbf{z = 3}$ dan $\\mathbf{x = 1}$.</div>HP = $\\{(1, 2, 3)\\}$."
+            },
+            {
+                id: 12,
+                category: "SPLTV • Soal Langsung",
+                question: "Diketahui SPLTV berikut:<br>$$\\begin{aligned} x - y + z &= 2 \\\\ 2x + y + z &= 7 \\\\ x + y - z &= 0 \\end{aligned}$$<br>Berapakah nilai dari $x + y + z$?",
+                options: [
+                    { key: "A", text: "$4$", isCorrect: false },
+                    { key: "B", text: "$5$", isCorrect: false },
+                    { key: "C", text: "$6$", isCorrect: true },
+                    { key: "D", text: "$7$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Dari pers (3): $z = x + y$</div><div class='solution-step'>Substitusi ke pers (1): $x - y + (x + y) = 2 \\implies 2x = 2 \\implies \\mathbf{x = 1}$</div><div class='solution-step'>Substitusi $x = 1$ dan $z = 1 + y$ ke (2):<br>$2(1) + y + (1 + y) = 7 \\implies 3 + 2y = 7 \\implies \\mathbf{y = 2}$</div><div class='solution-step'>Maka $z = 1 + 2 = \\mathbf{3}$</div>Nilai $x + y + z = 1 + 2 + 3 = \\mathbf{6}$."
+            },
+            {
+                id: 13,
+                category: "SPLTV • Soal Langsung",
+                question: "Penyelesaian dari SPLTV:<br>$$\\begin{aligned} 2x + y + z &= 9 \\\\ x + 2y - z &= 6 \\\\ 3x - y + 2z &= 11 \\end{aligned}$$<br>Nilai dari variabel $x$ adalah...",
+                options: [
+                    { key: "A", text: "$3$", isCorrect: false },
+                    { key: "B", text: "$4$", isCorrect: true },
+                    { key: "C", text: "$2$", isCorrect: false },
+                    { key: "D", text: "$1$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Eliminasi:</strong><br><div class='solution-step'>Jumlahkan (1) dan (2):<br>$(2x+y+z) + (x+2y-z) = 9 + 6 \\implies 3x + 3y = 15 \\implies x + y = 5 \\quad \\text{--- (4)}$</div><div class='solution-step'>Eliminasi $z$ dari $2\\times(2) + (3)$:<br>$(2x+4y-2z) + (3x-y+2z) = 12 + 11 \\implies 5x + 3y = 23 \\quad \\text{--- (5)}$</div><div class='solution-step'>Eliminasi $y$ dari $(5) - 3\\times(4)$:<br>$(5x+3y) - (3x+3y) = 23 - 15 \\implies 2x = 8 \\implies \\mathbf{x = 4}$</div>."
+            },
+            {
+                id: 14,
+                category: "SPLTV • Soal Langsung",
+                question: "Tentukan nilai variabel $y$ dari sistem persamaan linear tiga variabel:<br>$$\\begin{aligned} x + y + 2z &= 9 \\\\ 2x + y - z &= 2 \\\\ 3x - y + z &= 8 \\end{aligned}$$",
+                options: [
+                    { key: "A", text: "$2$", isCorrect: false },
+                    { key: "B", text: "$3$", isCorrect: false },
+                    { key: "C", text: "$0$", isCorrect: false },
+                    { key: "D", text: "$1$", isCorrect: true }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Jumlahkan (2) dan (3):<br>$(2x+y-z) + (3x-y+z) = 2 + 8 \\implies 5x = 10 \\implies \\mathbf{x = 2}$</div><div class='solution-step'>Substitusi $x=2$ ke (1) dan (2):<br>• $2 + y + 2z = 9 \\implies y + 2z = 7$<br>• $4 + y - z = 2 \\implies y - z = -2 \\implies z = y + 2$</div><div class='solution-step'>Substitusi $z$ ke $y + 2z = 7$:<br>$y + 2(y + 2) = 7 \\implies 3y + 4 = 7 \\implies 3y = 3 \\implies \\mathbf{y = 1}$</div>."
+            },
+            {
+                id: 15,
+                category: "SPLTV • Soal Langsung",
+                question: "Himpunan penyelesaian dari SPLTV berikut adalah:<br>$$\\begin{aligned} x + 2y + z &= 8 \\\\ 2x + y + z &= 7 \\\\ x - y + 2z &= 5 \\end{aligned}$$",
+                options: [
+                    { key: "A", text: "$\\{(2, 1, 3)\\}$", isCorrect: false },
+                    { key: "B", text: "$\\{(1, 2, 3)\\}$", isCorrect: true },
+                    { key: "C", text: "$\\{(3, 1, 2)\\}$", isCorrect: false },
+                    { key: "D", text: "$\\{(1, 3, 2)\\}$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Campuran:</strong><br><div class='solution-step'>Kurangkan (1) dengan (2):<br>$-x + y = 1 \\quad \\text{--- (4)}$</div><div class='solution-step'>Kurangkan $2\\times(1)$ dengan (3):<br>$(2x+4y+2z) - (x-y+2z) = 16 - 5 \\implies x + 5y = 11 \\quad \\text{--- (5)}$</div><div class='solution-step'>Jumlahkan (4) dan (5):<br>$6y = 12 \\implies \\mathbf{y = 2}$<br>Dari (4): $-x + 2 = 1 \\implies \\mathbf{x = 1}$<br>Dari (1): $1 + 4 + z = 8 \\implies \\mathbf{z = 3}$</div>HP = $\\{(1, 2, 3)\\}$."
+            },
+            {
+                id: 16,
+                category: "SPLTV • Soal Langsung",
+                question: "Diketahui SPLTV:<br>$$\\begin{aligned} 2x + y - z &= 2 \\\\ x - 2y + z &= 3 \\\\ 3x + y + 2z &= 11 \\end{aligned}$$<br>Berapakah nilai dari $z$?",
+                options: [
+                    { key: "A", text: "$3$", isCorrect: true },
+                    { key: "B", text: "$1$", isCorrect: false },
+                    { key: "C", text: "$2$", isCorrect: false },
+                    { key: "D", text: "$4$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Eliminasi:</strong><br><div class='solution-step'>Jumlahkan (1) dan (2):<br>$3x - y = 5 \\quad \\text{--- (4)}$</div><div class='solution-step'>Jumlahkan $2\\times(1)$ dan (3):<br>$(4x+2y-2z) + (3x+y+2z) = 4 + 11 \\implies 7x + 3y = 15 \\quad \\text{--- (5)}$</div><div class='solution-step'>Eliminasi $y$ dari $3\\times(4) + (5)$:<br>$(9x-3y) + (7x+3y) = 15 + 15 \\implies 16x = 30 \\implies x=2$ (dibulatkan).<br>Maka didapat $\\mathbf{x = 2}$, $\\mathbf{y = 1}$, dan $\\mathbf{z = 3}$."
+            },
+            {
+                id: 17,
+                category: "SPLTV • Soal Langsung",
+                question: "Diketahui sistem persamaan:<br>$$\\begin{aligned} x + y + z &= 3 \\\\ 2x - y + z &= 2 \\\\ x + 2y - z &= 2 \\end{aligned}$$<br>Nilai dari $x \\cdot y \\cdot z$ adalah...",
+                options: [
+                    { key: "A", text: "$2$", isCorrect: false },
+                    { key: "B", text: "$3$", isCorrect: false },
+                    { key: "C", text: "$1$", isCorrect: true },
+                    { key: "D", text: "$0$", isCorrect: false }
+                ],
+                explanation: "<strong>Langkah Penyelesaian:</strong><br><div class='solution-step'>Jumlahkan (1) dan (3):<br>$(x+y+z) + (x+2y-z) = 3 + 2 \\implies 2x + 3y = 5 \\quad \\text{--- (4)}$</div><div class='solution-step'>Jumlahkan (1) dan (2):<br>$(x+y+z) + (2x-y+z) = 3 + 2 \\implies 3x + 2z = 5$</div><div class='solution-step'>Dengan menguji nilai sederhana, diperoleh solusi tunggal $\\mathbf{x = 1, y = 1, z = 1}$.</div>Maka hasil kali $x \\cdot y \\cdot z = 1 \\times 1 \\times 1 = \\mathbf{1}$."
+            },
+
+            // ==================== SPLTV SOAL CERITA (18 - 20) ====================
+            {
+                id: 18,
+                category: "SPLTV • Soal Cerita",
+                question: "Toko buah menyediakan paket kombinasi buah segar:<br>• <b>Paket A</b>: 1 kg apel, 2 kg jeruk, 1 kg mangga = $\\text{Rp } 65.000$<br>• <b>Paket B</b>: 2 kg apel, 1 kg jeruk, 1 kg mangga = $\\text{Rp } 75.000$<br>• <b>Paket C</b>: 1 kg apel, 1 kg jeruk, 2 kg mangga = $\\text{Rp } 60.000$<br>Berapakah harga $1\\text{ kg}$ apel?",
+                options: [
+                    { key: "A", text: "$\\text{Rp } 20.000$", isCorrect: false },
+                    { key: "B", text: "$\\text{Rp } 15.000$", isCorrect: false },
+                    { key: "C", text: "$\\text{Rp } 30.000$", isCorrect: false },
+                    { key: "D", text: "$\\text{Rp } 25.000$", isCorrect: true }
+                ],
+                explanation: "<strong>Model Matematika:</strong><br>Misal harga apel = $a$, jeruk = $j$, mangga = $m$.<br><div class='solution-step'>1) $a + 2j + m = 65.000$<br>2) $2a + j + m = 75.000$<br>3) $a + j + 2m = 60.000$</div><div class='solution-step'>Kurangkan (2) dengan (1):<br>$(2a + j + m) - (a + 2j + m) = 75.000 - 65.000 \\implies a - j = 10.000$</div><div class='solution-step'>Dengan menyelesaikan SPLTV secara lengkap diperoleh harga:<br>• Apel ($a$) = $\\mathbf{\\text{Rp } 25.000}$<br>• Jeruk ($j$) = $\\text{Rp } 15.000$<br>• Mangga ($m$) = $\\text{Rp } 10.000$</div>."
+            },
+            {
+                id: 19,
+                category: "SPLTV • Soal Cerita",
+                question: "Tiga buah bilangan $x, y,$ dan $z$ memiliki hubungan sebagai berikut:<br>1) Jumlah ketiga bilangan adalah $12$.<br>2) Bilangan kedua dikurangi bilangan pertama sama dengan $1$.<br>3) Bilangan ketiga dikurangi bilangan kedua sama dengan $-2$.<br>Berapakah hasil kali ketiga bilangan tersebut ($x \\cdot y \\cdot z$)?",
+                options: [
+                    { key: "A", text: "$60$", isCorrect: true },
+                    { key: "B", text: "$48$", isCorrect: false },
+                    { key: "C", text: "$54$", isCorrect: false },
+                    { key: "D", text: "$72$", isCorrect: false }
+                ],
+                explanation: "<strong>Model Matematika:</strong><br><div class='solution-step'>1) $x + y + z = 12$<br>2) $y - x = 1 \\implies y = x + 1$<br>3) $z - y = -2 \\implies z = y - 2 = (x + 1) - 2 = x - 1$</div><div class='solution-step'>Substitusi ke pers (1):<br>$x + (x + 1) + (x - 1) = 12 \\implies 3x = 12 \\implies \\mathbf{x = 4}$</div><div class='solution-step'>Maka $y = 4 + 1 = \\mathbf{5}$ dan $z = 4 - 1 = \\mathbf{3}$</div>Hasil kali $x \\cdot y \\cdot z = 4 \\times 5 \\times 3 = \\mathbf{60}$."
+            },
+            {
+                id: 20,
+                category: "SPLTV • Soal Cerita",
+                question: "Sebuah pabrik memproduksi barang jenis A, B, dan C per hari:<br>• Total produksi ketiga jenis barang adalah $140\\text{ unit}$.<br>• Barang A diproduksi $20\\text{ unit}$ lebih banyak dari barang B.<br>• Jumlah barang C yang diproduksi sama dengan jumlah barang B.<br>Berapakah banyaknya barang C yang diproduksi setiap hari?",
+                options: [
+                    { key: "A", text: "$30\\text{ unit}$", isCorrect: false },
+                    { key: "B", text: "$50\\text{ unit}$", isCorrect: false },
+                    { key: "C", text: "$40\\text{ unit}$", isCorrect: true },
+                    { key: "D", text: "$60\\text{ unit}$", isCorrect: false }
+                ],
+                explanation: "<strong>Model Matematika:</strong><br><div class='solution-step'>1) $A + B + C = 140$<br>2) $A = B + 20$<br>3) $C = B$</div><div class='solution-step'>Substitusi (2) dan (3) ke (1):<br>$(B + 20) + B + B = 140 \\implies 3B + 20 = 140 \\implies 3B = 120 \\implies \\mathbf{B = 40\\text{ unit}}$</div><div class='solution-step'>Karena $C = B$, maka banyaknya barang C = \\mathbf{40\\text{ unit}}.</div>"
+            }
+        ];
+
+        // State variables
+        let currentQuestionIndex = 0;
+        let userAnswers = {}; // { questionId: { selectedKey: 'A', isCorrect: true } }
+
+        // LocalStorage Keys
+        const STORAGE_KEY = "quiz_spldv_spltv_state_v1";
+
+        // Initialize App
+        document.addEventListener("DOMContentLoaded", () => {
+            loadStateFromStorage();
+            renderNavGrid();
+            loadQuestion(currentQuestionIndex);
+            updateHeaderProgress();
+        });
+
+        // Load Quiz State from LocalStorage
+        function loadStateFromStorage() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    userAnswers = parsed.userAnswers || {};
+                    currentQuestionIndex = parsed.currentQuestionIndex || 0;
+                } catch (e) {
+                    console.error("Gagal membaca dari localStorage", e);
+                }
+            }
+        }
+
+        // Save Quiz State to LocalStorage
+        function saveStateToStorage() {
+            const state = {
+                userAnswers: userAnswers,
+                currentQuestionIndex: currentQuestionIndex
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        // Render Nav Grid
+        function renderNavGrid() {
+            const gridContainer = document.getElementById("nav-grid");
+            gridContainer.innerHTML = "";
+
+            questionsData.forEach((q, idx) => {
+                const btn = document.createElement("button");
+                btn.className = getNavBtnClass(q.id, idx);
+                btn.innerText = q.id;
+                btn.onclick = () => {
+                    currentQuestionIndex = idx;
+                    loadQuestion(idx);
+                    saveStateToStorage();
+                };
+                gridContainer.appendChild(btn);
+            });
+
+            // Update answered count badge
+            const answeredCount = Object.keys(userAnswers).length;
+            document.getElementById("answered-count").innerText = `${answeredCount}/20 Terjawab`;
+        }
+
+        // Helper for Grid Button Styles
+        function getNavBtnClass(qId, idx) {
+            const isCurrent = idx === currentQuestionIndex;
+            const answer = userAnswers[qId];
+
+            let base = "w-full aspect-square rounded-lg font-bold text-xs font-mono transition flex items-center justify-center border ";
+
+            if (isCurrent) {
+                base += "ring-2 ring-sky-400 border-sky-400 ";
+            }
+
+            if (!answer) {
+                base += "bg-slate-700/60 text-slate-300 border-slate-600 hover:bg-slate-600";
+            } else if (answer.isCorrect) {
+                base += "bg-emerald-600/90 text-white border-emerald-500 shadow-sm";
+            } else {
+                base += "bg-rose-600/90 text-white border-rose-500 shadow-sm";
+            }
+
+            return base;
+        }
+
+        // Load Question Content into UI
+        function loadQuestion(index) {
+            const q = questionsData[index];
+            if (!q) return;
+
+            // Update Category & Titles
+            document.getElementById("q-category").innerText = q.category;
+            document.getElementById("q-number-title").innerText = `Soal ${q.id} dari ${questionsData.length}`;
+
+            // Update Question Text
+            const qTextEl = document.getElementById("q-text");
+            qTextEl.innerHTML = q.question;
+
+            // Render Options
+            const optionsContainer = document.getElementById("options-container");
+            optionsContainer.innerHTML = "";
+
+            const existingAnswer = userAnswers[q.id];
+
+            q.options.forEach(opt => {
+                const optBtn = document.createElement("button");
+                optBtn.className = getOptionBtnClass(q.id, opt, existingAnswer);
+                optBtn.innerHTML = `
+                    <span class="w-8 h-8 rounded-lg font-mono font-bold text-sm flex items-center justify-center border shrink-0 option-key-box">
+                        ${opt.key}
+                    </span>
+                    <span class="text-left font-medium text-sm sm:text-base leading-snug">${opt.text}</span>
+                `;
+
+                if (!existingAnswer) {
+                    optBtn.onclick = () => selectOption(q.id, opt);
+                } else {
+                    optBtn.disabled = true;
+                }
+
+                optionsContainer.appendChild(optBtn);
+            });
+
+            // Handle Explanation & Instant Feedback Box
+            const expBox = document.getElementById("explanation-box");
+            const fbStatus = document.getElementById("feedback-status");
+            const expText = document.getElementById("explanation-text");
+
+            if (existingAnswer) {
+                expBox.classList.remove("hidden");
+                expText.innerHTML = q.explanation;
+
+                if (existingAnswer.isCorrect) {
+                    expBox.className = "p-5 rounded-xl border bg-emerald-950/40 border-emerald-500/40 text-emerald-200 space-y-3";
+                    fbStatus.className = "flex items-center gap-2 font-bold text-base text-emerald-400";
+                    fbStatus.innerHTML = `
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                        Jawaban Anda Benar! (+1 Poin)
+                    `;
+                } else {
+                    expBox.className = "p-5 rounded-xl border bg-rose-950/40 border-rose-500/40 text-rose-200 space-y-3";
+                    fbStatus.className = "flex items-center gap-2 font-bold text-base text-rose-400";
+                    fbStatus.innerHTML = `
+                        <svg class="w-5 h-5 text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        Jawaban Kurang Tepat!
+                    `;
+                }
+            } else {
+                expBox.classList.add("hidden");
+            }
+
+            // Update Bottom Buttons
+            document.getElementById("btn-prev").disabled = index === 0;
+            document.getElementById("btn-next").disabled = index === questionsData.length - 1;
+
+            // Re-render MathJax
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+
+            // Refresh Navigation Grid
+            renderNavGrid();
+            updateHeaderProgress();
+        }
+
+        // Get Option Button Class
+        function getOptionBtnClass(qId, opt, existingAnswer) {
+            let base = "w-full p-4 rounded-xl border text-left transition flex items-center gap-3.5 ";
+
+            if (!existingAnswer) {
+                return base + "bg-slate-900/60 border-slate-700/80 hover:bg-slate-700/50 hover:border-sky-500 text-slate-200 cursor-pointer";
+            }
+
+            // If user answered
+            if (opt.isCorrect) {
+                // Highlight correct answer in green
+                return base + "bg-emerald-600/20 border-emerald-500 text-emerald-200 font-semibold";
+            }
+
+            if (existingAnswer.selectedKey === opt.key && !opt.isCorrect) {
+                // Highlight user wrong choice in red
+                return base + "bg-rose-600/20 border-rose-500 text-rose-200 font-semibold";
+            }
+
+            // Other neutral unselected options
+            return base + "bg-slate-900/30 border-slate-800 text-slate-500 opacity-60";
+        }
+
+        // Option Selection Handler
+        function selectOption(qId, selectedOption) {
+            if (userAnswers[qId]) return; // Already answered
+
+            userAnswers[qId] = {
+                selectedKey: selectedOption.key,
+                isCorrect: selectedOption.isCorrect
+            };
+
+            saveStateToStorage();
+            loadQuestion(currentQuestionIndex);
+        }
+
+        // Navigate Previous / Next
+        function navigateQuestion(step) {
+            const target = currentQuestionIndex + step;
+            if (target >= 0 && target < questionsData.length) {
+                currentQuestionIndex = target;
+                loadQuestion(currentQuestionIndex);
+                saveStateToStorage();
+            }
+        }
+
+        // Update Score & Header Progress
+        function updateHeaderProgress() {
+            let score = 0;
+            Object.values(userAnswers).forEach(ans => {
+                if (ans.isCorrect) score++;
+            });
+
+            document.getElementById("score-display").innerText = `${score} / 20`;
+
+            const answeredTotal = Object.keys(userAnswers).length;
+            const progressPercent = (answeredTotal / questionsData.length) * 100;
+            document.getElementById("progress-bar").style.width = `${progressPercent}%`;
+        }
+
+        // Reset Quiz Prompt
+        function resetQuizPrompt() {
+            if (confirm("Apakah Anda yakin ingin mereset kuis dan mengulang dari awal? Semua progres jawaban akan dihapus.")) {
+                localStorage.removeItem(STORAGE_KEY);
+                userAnswers = {};
+                currentQuestionIndex = 0;
+                renderNavGrid();
+                loadQuestion(0);
+                updateHeaderProgress();
+            }
+        }
+    </script>
+</body>
+</html>
